@@ -30,7 +30,7 @@ _cworkon_complete() {
 }
 
 
-#install register-python-argcomplete  in conda root environment
-eval "$(register-python-argcomplete conda)"
+#install register-python-argcomplete in conda root environment
+eval "$("$CONDA_BIN/register-python-argcomplete" conda)"
 
 complete -F _cworkon_complete cworkon
