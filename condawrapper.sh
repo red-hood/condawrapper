@@ -1,8 +1,23 @@
-CONDA="$(which conda)"
-CONDA_BIN="$(dirname "$(readlink -e "$CONDA")")"
+_get_conda_root() {
+	local conda conda_bin
+	conda="$(which conda)"
+	if [ -z "$conda" ]; then
+		return 1
+	fi
+	conda_bin="$(dirname "$(readlink -e "$conda")")"
+	echo "$(dirname "$conda_bin")"
+}
+CONDA_ROOT_PREFIX="$(_get_conda_root)"
+unset -f _get_conda_root
+
+if [ -z "${CONDA_ROOT_PREFIX}" ]; then
+	unset CONDA_ROOT_PREFIX
+	>&2 echo "condawrapper: Could not find conda root environment"
+	return 1
+fi
 
 cworkon() {
-	source $CONDA_BIN/activate $1
+	source $CONDA_ROOT_PREFIX/bin/activate $1
 	deactivate() {
 		source deactivate
 		unset -f deactivate
@@ -31,6 +46,6 @@ _cworkon_complete() {
 
 
 #install register-python-argcomplete in conda root environment
-eval "$("$CONDA_BIN/register-python-argcomplete" conda)"
+eval "$("${CONDA_ROOT_PREFIX}/bin/register-python-argcomplete" conda)"
 
 complete -F _cworkon_complete cworkon
